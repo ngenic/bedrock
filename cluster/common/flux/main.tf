@@ -1,16 +1,121 @@
-module "common-provider" {
-  source = "../provider"
+locals {
+    namespace = "flux"
+    ssh_secret_name = "flux-ssh"
 }
 
-resource "null_resource" "deploy_flux" {
+resource "kubernetes_namespace" "gitops_namespace" {
+  metadata {
+    name = local.namespace
+  }
+}
+
+resource "helm_release" "flux_helm" {
   count = var.enable_flux ? 1 : 0
 
-  provisioner "local-exec" {
-    command = "echo 'Need to use this var so terraform waits for kubeconfig ' ${var.kubeconfig_complete};KUBECONFIG=${var.output_directory}/${var.kubeconfig_filename} ${path.module}/deploy_flux.sh -b '${var.gitops_url_branch}' -f '${var.flux_repo_url}' -g '${var.gitops_ssh_url}' -k '${var.gitops_ssh_key_path}' -d '${var.flux_clone_dir}' -c '${var.gitops_poll_interval}' -l '${var.gitops_label}' -e '${var.gitops_path}' -s '${var.acr_enabled}' -r '${var.flux_image_repository}' -t '${var.flux_image_tag}' -z '${var.gc_enabled}'"
+  name              = "gitops-flux"
+  repository        = "https://charts.fluxcd.io" 
+  chart             = "flux"
+  version           = "1.5.0"
+
+  namespace         = kubernetes_namespace.gitops_namespace.metadata.0.name
+
+  set {
+    name  = "image.repository"
+    value = var.flux_image_repository
+    type = "string"
   }
 
-  triggers = {
-    enable_flux   = var.enable_flux
-    flux_recreate = var.flux_recreate
+  set {
+    name  = "image.tag"
+    value = var.flux_image_tag
+    type = "string"
+  }
+
+  set {
+    name  = "git.url"
+    value = var.gitops_ssh_url
+    type = "string"
+  }
+
+  set {
+    name  = "git.branch"
+    value = var.gitops_url_branch
+    type = "string"
+  } 
+
+  set {
+    name  = "git.secretName"
+    value = local.ssh_secret_name
+    type = "string"
+  }
+
+  set {
+    name  = "git.path"
+    value = var.gitops_path
+    type = "string"
+  }
+
+  set {
+    name  = "git.pollInterval"
+    value = var.gitops_poll_interval
+    type = "string"
+  }
+
+  set {
+    name  = "git.label"
+    value = var.gitops_label
+    type = "string"
+  }
+
+  set {
+    name  = "registry.acr.enabled"
+    value = var.acr_enabled
+    type = "string"
+  }
+
+  set {
+    name  = "syncGarbageCollection.enabled"
+    value = var.gc_enabled
+    type = "string"
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = "flux"
+    type = "string"
+  }
+}
+
+resource "helm_release" "flux_helm_operator" {
+  count = var.enable_flux && var.enable_helm_operator ? 1 : 0
+
+  name              = "gitops-flux-helm-operator"
+  repository        = "https://charts.fluxcd.io" 
+  chart             = "helm-operator"
+  version           = "1.2.0"
+
+  namespace         = kubernetes_namespace.gitops_namespace.metadata.0.name
+
+  set {
+    name  = "helm.versions"
+    value = "v3"
+    type = "string"
+  }
+
+  set {
+    name = "git.ssh.secretName"
+    value = local.ssh_secret_name
+    type = "string"
+  }
+}
+
+resource "kubernetes_secret" "gitops_ssh_secret" {
+  metadata {
+    name = local.ssh_secret_name
+    namespace = kubernetes_namespace.gitops_namespace.metadata.0.name
+  }
+
+  data = {
+    identity = file(var.gitops_ssh_key_path)
   }
 }
