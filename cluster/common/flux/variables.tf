@@ -1,9 +1,3 @@
-# URL to get flux which will be installed in the Kubernetes cluster
-variable "flux_repo_url" {
-  type    = string
-  default = "https://github.com/fluxcd/flux.git"
-}
-
 # container registry to download flux image
 variable "flux_image_repository" {
   type    = string
@@ -13,7 +7,7 @@ variable "flux_image_repository" {
 # flux version to download source from git repo and container image from the registry
 variable "flux_image_tag" {
   type    = string
-  default = "1.18.0"
+  default = "1.20.2"
 }
 
 variable "gitops_path" {
@@ -60,34 +54,12 @@ variable "gitops_ssh_key_path" {
   type = string
 }
 
-variable "output_directory" {
-  type    = string
-  default = "./output"
-}
-
 variable "enable_flux" {
   type    = string
   default = "true"
 }
 
-variable "kubeconfig_filename" {
-  description = "Name of the kube config file saved to disk."
-  type        = string
-  default     = "bedrock_kube_config"
-}
-
-variable "flux_recreate" {
-  description = "Make any change to this value to trigger the recreation of the flux execution script."
-  type        = string
-  default     = ""
-}
-
-variable "kubeconfig_complete" {
-  description = "Allows flux to wait for the kubeconfig completion write to disk. Workaround for the fact that modules themselves cannot have dependencies."
-  type        = string
-}
-
-variable "flux_clone_dir" {
-  description = "Name of the directory to clone flux repo and deploy in the cluster."
-  type        = string
+variable "enable_helm_operator" {
+  type    = string
+  default = "true"
 }
