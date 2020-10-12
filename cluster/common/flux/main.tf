@@ -90,7 +90,7 @@ resource "helm_release" "flux_helm_operator" {
   count = var.enable_flux && var.enable_helm_operator ? 1 : 0
 
   name              = "gitops-flux-helm-operator"
-  repository        = "https://charts.fluxcd.io" 
+  repository        = "https://charts.fluxcd.io"
   chart             = "helm-operator"
   version           = "1.2.0"
 
