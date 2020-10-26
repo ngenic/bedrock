@@ -35,11 +35,6 @@ variable "gitops_url_branch" {
   default     = "master"
 }
 
-variable "acr_enabled" {
-  type    = string
-  default = "true"
-}
-
 variable "gc_enabled" {
   type    = string
   default = "true"
@@ -62,4 +57,19 @@ variable "enable_flux" {
 variable "enable_helm_operator" {
   type    = string
   default = "true"
+}
+
+variable "keyvault_spc_name" {
+  type    = string
+  default = ""
+}
+
+variable "pod_identity_selector" {
+  type    = string
+  default = ""
+}
+
+variable "dependency_hook" {
+  type    = string
+  default = ""
 }

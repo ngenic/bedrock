@@ -19,6 +19,14 @@ resource "helm_release" "flux_helm" {
 
   namespace         = kubernetes_namespace.gitops_namespace.metadata.0.name
 
+  replace = true
+
+  set {
+    name = "podLabels.aadpodidbinding"
+    value = "${var.pod_identity_selector}"
+    type = "string"
+  }
+
   set {
     name  = "image.repository"
     value = var.flux_image_repository
@@ -68,12 +76,6 @@ resource "helm_release" "flux_helm" {
   }
 
   set {
-    name  = "registry.acr.enabled"
-    value = var.acr_enabled
-    type = "string"
-  }
-
-  set {
     name  = "syncGarbageCollection.enabled"
     value = var.gc_enabled
     type = "string"
@@ -83,6 +85,46 @@ resource "helm_release" "flux_helm" {
     name  = "serviceAccount.name"
     value = "flux"
     type = "string"
+  }
+
+  set {
+    name  = "extraVolumes[0].name"
+    value = "secrets-store-inline"
+    type  = "string"
+  }
+
+  set {
+    name  = "extraVolumes[0].csi.driver"
+    value = "secrets-store.csi.k8s.io"
+    type  = "string"
+  }
+
+  set {
+    name  = "extraVolumes[0].csi.readOnly"
+    value = true
+  }
+
+  set {
+    name  = "extraVolumes[0].csi.volumeAttributes.secretProviderClass"
+    value = var.keyvault_spc_name
+    type = "string"
+  }
+
+  set {
+    name  = "extraVolumeMounts[0].name"
+    value = "secrets-store-inline"
+    type  = "string"
+  }
+
+  set {
+    name  = "extraVolumeMounts[0].mountPath"
+    value = "/etc/kubernetes/"
+    type  = "string"
+  }
+
+  set {
+    name  = "extraVolumeMounts[0].readOnly"
+    value = true
   }
 }
 
