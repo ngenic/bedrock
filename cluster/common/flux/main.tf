@@ -19,7 +19,11 @@ resource "helm_release" "flux_helm" {
 
   namespace         = kubernetes_namespace.gitops_namespace.metadata.0.name
 
-  replace = true
+  set {
+    name = "logFormat"
+    value = "json"
+    type = "string"
+  }
 
   set {
     name = "podLabels.aadpodidbinding"
@@ -138,6 +142,12 @@ resource "helm_release" "flux_helm_operator" {
 
   namespace         = kubernetes_namespace.gitops_namespace.metadata.0.name
 
+  set {
+    name = "logFormat"
+    value = "json"
+    type = "string"
+  }  
+  
   set {
     name  = "helm.versions"
     value = "v3"
