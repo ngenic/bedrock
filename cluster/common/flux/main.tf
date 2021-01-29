@@ -130,6 +130,18 @@ resource "helm_release" "flux_helm" {
     name  = "extraVolumeMounts[0].readOnly"
     value = true
   }
+
+  set {
+    name = "registry.excludeImage[0]"
+    value = "index.docker.io/*"
+    type = "string"
+  }
+
+  set {
+    name = "registry.excludeImage[1]"
+    value = "k8s.gcr.io/*"
+    type = "string"
+  }
 }
 
 resource "helm_release" "flux_helm_operator" {
