@@ -3,6 +3,16 @@ locals {
     ssh_secret_name = "flux-ssh"
 }
 
+data "terraform_remote_state" "persistent_resources" {
+  backend = "azurerm"
+  config = {
+    resource_group_name     = "ngenic-aks-tfstate-rg"
+    storage_account_name    = "ngenicakstfstate"
+    container_name          = "tfstate"
+    key                     = "prod.persistent-resources.tfstate"
+  }
+}
+
 resource "kubernetes_namespace" "gitops_namespace" {
   metadata {
     name = local.namespace
@@ -129,6 +139,40 @@ resource "helm_release" "flux_helm" {
   set {
     name  = "extraVolumeMounts[0].readOnly"
     value = true
+  }
+
+  set {
+    name = "dashboards.enabled"
+    value = true
+  }
+
+  set {
+    name = "dashboards.namespace"
+    value = "monitoring"
+    type = "string"
+  }
+
+  set {
+    name = "registry.includeImage[0]"
+    value = "${data.terraform_remote_state.persistent_resources.outputs.acr_login_server}/*"
+    type = "string"
+  }
+
+  set {
+    name = "registry.dockercfg.enabled"
+    value = true
+  }
+
+  set {
+    name = "registry.dockercfg.secretName"
+    value = "docker-config-json"
+    type = "string"
+  }
+
+  set {
+    name = "registry.dockercfg.configFileName"
+    value = "/dockercfg/docker-config.json"
+    type = "string"
   }
 }
 
