@@ -159,6 +159,17 @@ resource "helm_release" "flux_helm_operator" {
     value = local.ssh_secret_name
     type = "string"
   }
+
+  set {
+    name = "dashboards.enabled"
+    value = true
+  }
+
+  set {
+    name = "dashboards.namespace"
+    value = "monitoring"
+    type = "string"
+  }
 }
 
 resource "kubernetes_secret" "gitops_ssh_secret" {
