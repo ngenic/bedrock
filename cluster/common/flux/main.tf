@@ -146,23 +146,6 @@ resource "helm_release" "flux_helm" {
     value = "${data.terraform_remote_state.persistent_resources.outputs.acr_login_server}/*"
     type = "string"
   }
-
-  set {
-    name = "registry.dockercfg.enabled"
-    value = true
-  }
-
-  set {
-    name = "registry.dockercfg.secretName"
-    value = "docker-config-json"
-    type = "string"
-  }
-
-  set {
-    name = "registry.dockercfg.configFileName"
-    value = "/dockercfg/docker-config.json"
-    type = "string"
-  }
 }
 
 resource "helm_release" "flux_helm_operator" {
