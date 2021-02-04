@@ -142,7 +142,7 @@ resource "helm_release" "flux_helm" {
   }
 
   set {
-    name = "registry.includeImage[0]"
+    name = "registry.includeImage"
     value = "${data.terraform_remote_state.persistent_resources.outputs.acr_login_server}/*"
     type = "string"
   }
